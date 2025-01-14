@@ -1,32 +1,58 @@
-# Neumorphic Calculator
+# Neumorphic Calculator Compile Script
 
-A Soft UI Calculator using Flutter.
+A GitHub Action Script to compile [Neumorphic Calculator](https://github.com/belelaritra/Neumorphic_Calculator) APKs.
 
 ![Downloads](https://img.shields.io/github/downloads/belelaritra/Neumorphic_Calculator/total)
 
-&nbsp;&nbsp;&nbsp;&nbsp;[<img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white"
-     alt="Download from GitHub"
-     height="60">](https://github.com/belelaritra/Neumorphic_Calculator/releases)
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="100">](https://f-droid.org/packages/com.neumorphic.calculator/)
+[Script](https://github.com/ILoveScratch2/NeumorphicCalculator-BuildAction/blob/main/.github/workflows/build_flutter.yml)
 
-## Modes:
-- [x] Simple
-- [x] Advanced (**Currently, only trigonometric functions with radians is stable.** Degree operations have been implemented using a *non-tested* [fork](https://github.com/danger-ahead/math-expressions/tree/add-degree-hack) of the official [math_expressions](https://github.com/fkleon/math-expressions) library.)
+```yaml
+name: Build Flutter APK
 
-## Screenshots
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-<p float="left">
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-### Light Mode
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/simple-light.png" height="400" />&nbsp;<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/advanced-light.png" height="400" />&nbsp;<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/history-light.png" height="400" />&nbsp;<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/drawer-light.png" height="400" />
+    steps:
+    # 1. Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-### Dark Mode
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/simple-dark.png" height="400" />&nbsp;<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/advanced-dark.png" height="400" />&nbsp;<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/history-dark.png" height="400" />&nbsp;<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/drawer-dark.png" height="400" />
-</p>
+    # 2. Set up Flutter
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '2.8.1'
 
-#### List of Contributors:
-- [Valdnet](https://github.com/Valdnet) (Translation to Polish)
-- [leestarb](https://github.com/leestarb) (Translation to Russian)
+    # 3. Install Java 11
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'  # 选择合适的 Java 版本
+        distribution: 'adopt'
+
+    # 4. Install dependencies
+    - name: Install dependencies
+      run: |
+        flutter config --no-analytics
+        flutter pub get
+
+    # 5. Build APK
+    - name: Build APK
+      run: |
+        flutter build apk --debug
+
+    # 6. Upload APK artifact
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release.apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
+```
